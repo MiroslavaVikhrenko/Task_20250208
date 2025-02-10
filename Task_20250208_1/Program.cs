@@ -34,7 +34,6 @@ namespace Task_20250208_1
             CreateDatabase(connectionString);
 
             string connectionString2 = configuration.GetConnectionString("Shop");
-
             CreateTable(connectionString2);
 
             List<Phone> phones = new List<Phone>()
@@ -50,11 +49,76 @@ namespace Task_20250208_1
                 new Phone(9, "Samsung", "Galaxy M35 5G", 2024, 1150),
                 new Phone(10, "Samsung", "A55 5G", 2024, 1100)
             };
-
             PopulateTable(connectionString2, phones);
+
+            List<Phone> retrievedPhones = GetPhonesFromDb(connectionString2);
+            PrintPhones(retrievedPhones);
+
+            DeleteById(3, connectionString2);
+            DeleteById(7, connectionString2);
+            List<Phone> retrievedPhones2 = GetPhonesFromDb(connectionString2);          
+            PrintPhones(retrievedPhones2);
 
             Console.ReadKey();
             
+        }
+
+        static void DeleteById(int id, string connectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string commandtext = $"""
+                    DELETE FROM [Phones]
+                    WHERE Id = {id}
+                    """;
+                SqlCommand command = new SqlCommand(commandtext, connection);
+                command.ExecuteNonQuery();
+                Console.WriteLine($"Phone with id = {id} deleted");
+            }
+        }
+        static void PrintPhones(List<Phone> phones)
+        {
+            Console.WriteLine("\n\n******************************\n");
+            Console.WriteLine("List of phones:");
+
+            foreach (var phone in phones)
+            {
+                Console.WriteLine($"{phone.Id} | {phone.Manufacturer} | {phone.Model} | {phone.Year} | {phone.Price}");
+            }
+            Console.WriteLine("\n******************************\n");
+        }
+        static List<Phone> GetPhonesFromDb(string connectionString)
+        {
+            List<Phone> phones = new List<Phone>();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                string commandtext = $"""
+                    SELECT Id, Manufacturer, Model, Year, Price FROM [Phone]
+                    """;
+                SqlCommand command = new SqlCommand(commandtext, connection);
+
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            int id = Convert.ToInt32(reader.GetValue(0));
+                            string manufacturer = reader.GetValue(1).ToString();
+                            string model = reader.GetValue(2).ToString();
+                            int year = Convert.ToInt32(reader.GetValue(3));
+                            int price = Convert.ToInt32(reader.GetValue(4));
+
+                            phones.Add(new Phone(id, manufacturer, model, year, price));
+                        }
+                    }
+                }
+            }
+
+            return phones;
         }
 
         static void PopulateTable(string connectionString, List<Phone> phones)
