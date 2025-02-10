@@ -59,8 +59,30 @@ namespace Task_20250208_1
             List<Phone> retrievedPhones2 = GetPhonesFromDb(connectionString2);          
             PrintPhones(retrievedPhones2);
 
+            UpdateRows(1, connectionString2);
+            UpdateRows(2, connectionString2);
+            UpdateRows(4, connectionString2);
+            List<Phone> retrievedPhones3 = GetPhonesFromDb(connectionString2);
+            PrintPhones(retrievedPhones3);
+
             Console.ReadKey();
             
+        }
+
+        static void UpdateRows(int id, string connectionString)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                string commandtext = $"""
+                    UPDATE [Phones]
+                    SET Price = Price - 100
+                    WHERE Id = {id}
+                    """;
+                SqlCommand command = new SqlCommand(commandtext, connection);
+                command.ExecuteNonQuery();
+                Console.WriteLine($"Price updated, discount applied for phone id = {id}");
+            }
         }
 
         static void DeleteById(int id, string connectionString)
