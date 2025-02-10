@@ -118,7 +118,7 @@ namespace Task_20250208_1
                 connection.Open();
 
                 string commandtext = $"""
-                    SELECT Id, Manufacturer, Model, Year, Price FROM [Phone]
+                    SELECT Id, Manufacturer, Model, Year, Price FROM [Phones]
                     """;
                 SqlCommand command = new SqlCommand(commandtext, connection);
 
